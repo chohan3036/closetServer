@@ -1,0 +1,4 @@
+./closetServer/config/*
+closetServer/config/*
+closetServer/recommendation/dbPool.py
+closetServer/recommendation/s3_config.py
