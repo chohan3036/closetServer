@@ -193,6 +193,11 @@ def makeLookTable(uid):
     result = cursor.fetchall() 
     #print(result)
 
+    
+    
+###############################  
+### 아래부터 Flask 네트워크 ###
+###############################
 
 @app.route('/dbsaveClothes', methods = ['POST'])
 def saveClothingNetworking():
@@ -213,18 +218,16 @@ def saveClothingNetworking():
 def savePhoto(filestr):
     result = grabcut.grabCut(filestr)
     result = transparent.transparent(result)
+    
     file_path = 'grabcuted-' + filestr
     cv2.imwrite(file_path, result)
+    
     bucket = "closetsook"
     region = "ap-northeast-2"
     s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=region)
-    # acl = s3.get_bucket_acl(Bucket=bucket)
-    # s3.put_bucket_acl(Bucket=bucket, AccessControlPolicy=acl)
-    # s3.put_object( ACL="public-read")
     s3.upload_file(Bucket=bucket, Filename=os.path.abspath(file_path), Key=filestr, ExtraArgs={'ACL': 'public-read'})
-    # s3.upload_file(os.path.abspath(file_path),bucket,filename)
-    # location = boto3.client('s3').get_bucket_location(Bucket=bucket)['LocationConstraint']
     url = "https://%s.s3.%s.amazonaws.com/%s" % (bucket, region, filestr)
+    
     os.remove(file_path)
     return url
 
@@ -241,10 +244,10 @@ def save_avatar():
     url = savePhoto(filestr)
     response = pose(request.form['uid'],filestr,url)
 
-    #print("routing response",response)
     os.remove(filestr)
-
-    if(response != None): #insert성공
+    
+    # insert 성공
+    if(response != None): 
         return ({"message":"good","status":201,"result":str(response)},201)
     else:
         return {"message":"faiiled"}
@@ -263,10 +266,10 @@ def save_clohtes():
     print(colorStr)
     labelStr = classify.label(filestr)
     print(labelStr)
+    
     os.remove(filestr)
-    #saveClothingNetworking(request,url)
+    
     response = None
-    #print(connection.insert_id())
     if(connection.insert_id() !=  None):
         response = {"status":201,"message":"successfully saved your clothing",
                     "colorR":rgb[0],"colorG":rgb[1],"colorB":rgb[2],
